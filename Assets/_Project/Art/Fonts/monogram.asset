@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 71c1514a6bd24e1e882cebbe1904ce04, type: 3}
   m_Name: monogram
   m_EditorClassIdentifier: 
-  hashCode: 0
-  material: {fileID: 694781985258892095}
-  materialHashCode: -2006316128
+  hashCode: -2040238342
+  material: {fileID: 1477269109741613964}
+  materialHashCode: 1611401498
   m_Version: 1.1.0
   m_SourceFontFileGUID: 1533be7e26d9ed545b5ad48528206dd2
   m_SourceFontFile_EditorRef: {fileID: 12800000, guid: 1533be7e26d9ed545b5ad48528206dd2, type: 3}
@@ -1850,7 +1850,7 @@ MonoBehaviour:
     m_GlyphIndex: 97
     m_Scale: 1
   m_AtlasTextures:
-  - {fileID: 5039022322212626027}
+  - {fileID: 1690775881235930115}
   m_AtlasTextureIndex: 0
   m_IsMultiAtlasTexturesEnabled: 1
   m_ClearDynamicDataOnBuild: 0
@@ -2455,7 +2455,7 @@ MonoBehaviour:
   boldSpacing: 7
   italicStyle: 35
   tabSize: 10
---- !u!21 &694781985258892095
+--- !u!21 &1477269109741613964
 Material:
   serializedVersion: 8
   m_ObjectHideFlags: 0
@@ -2479,7 +2479,7 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _MainTex:
-        m_Texture: {fileID: 5039022322212626027}
+        m_Texture: {fileID: 1690775881235930115}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Ints: []
@@ -2492,9 +2492,9 @@ Material:
     - _OutlineSoftness: 0
     - _OutlineWidth: 0
     - _PerspectiveFilter: 0.875
-    - _ScaleRatioA: 1
+    - _ScaleRatioA: 0.8333333
     - _ScaleRatioB: 1
-    - _ScaleRatioC: 1
+    - _ScaleRatioC: 0.6770833
     - _ScaleX: 1
     - _ScaleY: 1
     - _ShaderFlags: 0
@@ -2519,7 +2519,7 @@ Material:
     - _OutlineColor: {r: 0, g: 0, b: 0, a: 1}
     - _UnderlayColor: {r: 0, g: 0, b: 0, a: 0.5}
   m_BuildTextureStacks: []
---- !u!28 &5039022322212626027
+--- !u!28 &1690775881235930115
 Texture2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

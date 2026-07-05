@@ -24,8 +24,25 @@ namespace DuskWarung.Core
         /// <summary>Whether a return position has been set (false on a fresh overworld load).</summary>
         public static bool HasReturnPosition;
 
-        /// <summary>Simple story flags (e.g. "talked_to_sari", "beat_genderuwo").</summary>
+        /// <summary>
+        /// The game-wide event-flag layer (e.g. "met_bu_sari", "beat_genderuwo"). Progression gates read
+        /// these rather than hard-coding booleans on individual objects, so the story order scales to new
+        /// quests without touching systems code. Raised by designers from flowcharts via the "Set Flag"
+        /// Fungus command; read by gates such as <see cref="World.EncounterTrigger"/>.
+        /// </summary>
         public static readonly HashSet<string> StoryFlags = new HashSet<string>();
+
+        /// <summary>Raises a story flag. Idempotent; null/empty is ignored.</summary>
+        public static void SetFlag(string flag)
+        {
+            if (!string.IsNullOrEmpty(flag))
+            {
+                StoryFlags.Add(flag);
+            }
+        }
+
+        /// <summary>Returns true once <paramref name="flag"/> has been raised this playthrough.</summary>
+        public static bool HasFlag(string flag) => !string.IsNullOrEmpty(flag) && StoryFlags.Contains(flag);
 
         /// <summary>Clears all session state. Call when starting a brand-new playthrough.</summary>
         public static void Reset()

@@ -35,6 +35,13 @@ namespace DuskWarung.Core
         private CanvasGroup _group;
         private bool _busy;
 
+        /// <summary>
+        /// True while a fade-out → load → fade-in is in progress. Incoming scenes wait on this before
+        /// showing their first dialog, so UI only ever appears on a fully-revealed, stable scene (rather
+        /// than racing the fade-in and popping into view). See <see cref="Battle.View.BattleController"/>.
+        /// </summary>
+        public bool IsBusy => _busy;
+
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void Bootstrap() => Create();
 

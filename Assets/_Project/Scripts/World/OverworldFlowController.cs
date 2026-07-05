@@ -1,3 +1,4 @@
+using System.Collections;
 using DuskWarung.Battle;
 using DuskWarung.Core;
 using DuskWarung.FungusCommands;
@@ -30,21 +31,41 @@ namespace DuskWarung.World
 
         private void Start()
         {
-            switch (GameSession.LastBattleResult)
+            BattleOutcome result = GameSession.LastBattleResult;
+
+            // Reposition immediately (behind the still-black transition overlay)...
+            string block = null;
+            switch (result)
             {
                 case BattleOutcome.Defeat:
                     PlaceAt(defeatSpawn);
-                    PlayBlock(defeatBlock);
+                    block = defeatBlock;
                     break;
 
                 case BattleOutcome.Fled:
                     PlaceAt(fleeSpawn);
-                    PlayBlock(fleeBlock);
+                    block = fleeBlock;
                     break;
             }
 
             // Consume so a later, non-battle load of this scene does not replay the reaction.
             GameSession.LastBattleResult = BattleOutcome.None;
+
+            // ...but defer the return dialog until the scene is fully revealed, so it can't flash mid-fade.
+            if (!string.IsNullOrEmpty(block))
+            {
+                StartCoroutine(PlayBlockAfterReveal(block));
+            }
+        }
+
+        private IEnumerator PlayBlockAfterReveal(string block)
+        {
+            while (SceneTransition.Instance.IsBusy)
+            {
+                yield return null;
+            }
+
+            PlayBlock(block);
         }
 
         private void PlaceAt(Transform spawn)

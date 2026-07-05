@@ -27,6 +27,7 @@ namespace DuskWarung.EditorTools
     public static class SceneBuildTool
     {
         private static Sprite _uiSprite;
+        private static Sprite _whiteSprite;
         private static TMP_FontAsset _fontBody;
         private static TMP_FontAsset _fontNumbers;
 
@@ -63,19 +64,59 @@ namespace DuskWarung.EditorTools
             SceneLoader loader = MakeFadeCanvas();
 
             Canvas canvas = MakeCanvas("TitleUI");
-            AddText(canvas.transform, "Title", "Dusk at the Warung", _fontBody, 12f, TextAlignmentOptions.Center,
-                new Vector2(0.5f, 0.62f), new Vector2(700, 120));
-            TextMeshProUGUI prompt = AddText(canvas.transform, "Prompt", "Press Space to begin", _fontBody, 6f,
-                TextAlignmentOptions.Center, new Vector2(0.5f, 0.32f), new Vector2(500, 60));
+
+            // Backdrop (dusk-tinted battle art) + a dark vignette so the title text stays legible.
+            Sprite backdrop = AssetDatabase.LoadAssetAtPath<Sprite>(DuskEditorUtil.SpritesDir + "/battleback1.png");
+            FullscreenImage(canvas.transform, "Backdrop", backdrop, new Color(0.5f, 0.5f, 0.62f, 1f));
+            FullscreenImage(canvas.transform, "Vignette", null, new Color(0.02f, 0.02f, 0.05f, 0.5f));
+
+            TextMeshProUGUI title = AddText(canvas.transform, "Title", "Dusk at the Warung", _fontBody, 13f,
+                TextAlignmentOptions.Center, new Vector2(0.5f, 0.66f), new Vector2(1000, 150));
+            title.color = new Color(1f, 0.93f, 0.8f);
+
+            TextMeshProUGUI subtitle = AddText(canvas.transform, "Subtitle", "a turn-based vertical slice",
+                _fontBody, 5f, TextAlignmentOptions.Center, new Vector2(0.5f, 0.55f), new Vector2(700, 50));
+            subtitle.color = new Color(0.82f, 0.78f, 0.72f);
+
+            TextMeshProUGUI prompt = AddText(canvas.transform, "Prompt", "Press Space to begin", _fontBody, 6.5f,
+                TextAlignmentOptions.Center, new Vector2(0.5f, 0.34f), new Vector2(600, 60));
+            prompt.color = new Color(1f, 0.96f, 0.85f);
+
+            // In-game controls hint — a recruiter playing the build shouldn't need the README to move.
+            TextMeshProUGUI controls = AddText(canvas.transform, "Controls",
+                "WASD / Arrows — Move        Space — Interact / Confirm", _fontBody, 4.2f,
+                TextAlignmentOptions.Center, new Vector2(0.5f, 0.2f), new Vector2(1200, 50));
+            controls.color = new Color(0.75f, 0.75f, 0.8f);
+
+            TextMeshProUGUI credits = AddText(canvas.transform, "Credits",
+                "Vertical slice — Malvin Leonardo Hartanto", _fontBody, 3.6f,
+                TextAlignmentOptions.Center, new Vector2(0.5f, 0.06f), new Vector2(900, 40));
+            credits.color = new Color(0.6f, 0.6f, 0.66f);
 
             var controllerGo = new GameObject("TitleController");
-            var title = controllerGo.AddComponent<TitleScreenController>();
-            DuskEditorUtil.WireObject(title, "loader", loader);
-            DuskEditorUtil.WireString(title, "firstSceneName", "Overworld");
-            DuskEditorUtil.WireObject(title, "pressStartPrompt", prompt.gameObject);
+            var titleController = controllerGo.AddComponent<TitleScreenController>();
+            DuskEditorUtil.WireObject(titleController, "loader", loader);
+            DuskEditorUtil.WireString(titleController, "firstSceneName", "Overworld");
+            DuskEditorUtil.WireObject(titleController, "pressStartPrompt", prompt.gameObject);
 
             MakeAudio(controllerGo, "Title");
             Save(scene);
+        }
+
+        private static Image FullscreenImage(Transform parent, string name, Sprite sprite, Color color)
+        {
+            var go = new GameObject(name, typeof(RectTransform));
+            go.transform.SetParent(parent, false);
+            var img = go.AddComponent<Image>();
+            if (sprite != null)
+            {
+                img.sprite = sprite;
+            }
+
+            img.color = color;
+            img.raycastTarget = false;
+            Stretch(img.rectTransform);
+            return img;
         }
 
         private static void BuildEnd()
@@ -124,6 +165,11 @@ namespace DuskWarung.EditorTools
             var bridge = flowchartGo.AddComponent<FungusBridge>();
             DuskEditorUtil.WireObject(bridge, "flowchart", flowchart);
 
+            // Dialogue box + speakers (Fungus Characters supply the name plate + portrait).
+            BuildDialogueActors(
+                ("Traveller", DuskEditorUtil.PlayerFaceset, new Color(0.78f, 0.88f, 1f)),
+                ("Bu Sari", DuskEditorUtil.OldWomanFaceset, new Color(1f, 0.82f, 0.55f)));
+
             // Actors.
             GameObject player = Spawn("World/Player", new Vector3(0f, -1f, 0f));
             GameObject buSari = Spawn("World/BuSari", new Vector3(-3f, -1.6f, 0f));
@@ -156,6 +202,9 @@ namespace DuskWarung.EditorTools
             var encounterTrigger = triggerGo.AddComponent<EncounterTrigger>();
             DuskEditorUtil.WireObject(encounterTrigger, "encounter", LoadEncounter());
             DuskEditorUtil.WireObject(encounterTrigger, "loader", loader);
+            DuskEditorUtil.WireObject(encounterTrigger, "fungus", bridge);
+            DuskEditorUtil.WireString(encounterTrigger, "requiredFlag", "met_bu_sari");
+            DuskEditorUtil.WireString(encounterTrigger, "gatedHintBlock", "GroveGatedHint");
 
             // Return-from-battle handler.
             var benchSpawn = MakePoint("Spawn_Bench", new Vector3(-2.5f, -1.6f, 0f));
@@ -166,6 +215,18 @@ namespace DuskWarung.EditorTools
             DuskEditorUtil.WireObject(flow, "defeatSpawn", benchSpawn.transform);
 
             MakeAudio(flowGo, "Overworld");
+
+            // Brief, self-dismissing control reminder (fades out) — controls stay discoverable in-game.
+            Canvas hintCanvas = MakeCanvas("HintCanvas");
+            RectTransform hintBar = Panel(hintCanvas.transform, "HintBar", new Vector2(0.5f, 0f), new Vector2(0.5f, 0f),
+                new Vector2(0.5f, 0f), new Vector2(0f, 44f), new Vector2(600, 46));
+            TextMeshProUGUI hint = AddChildText(hintBar, "Hint", "WASD / Arrows — Move      ·      Space — Talk",
+                _fontBody, 4.5f, Vector2.zero, new Vector2(580, 42));
+            hint.alignment = TextAlignmentOptions.Center;
+            hint.color = new Color(1f, 0.97f, 0.88f);
+            Stretch(hint.rectTransform);
+            hintBar.gameObject.AddComponent<HintToast>();
+
             Save(scene);
         }
 
@@ -204,6 +265,11 @@ namespace DuskWarung.EditorTools
             var bridge = flowchartGo.AddComponent<FungusBridge>();
             DuskEditorUtil.WireObject(bridge, "flowchart", flowchart);
 
+            // Dialogue box + speakers for the battle intro/victory lines.
+            BuildDialogueActors(
+                ("Traveller", DuskEditorUtil.PlayerFaceset, new Color(0.78f, 0.88f, 1f)),
+                ("Genderuwo", DuskEditorUtil.SpritesDir + "/Enemy_Genderuwo/Faceset.png", new Color(0.85f, 0.6f, 0.95f)));
+
             // Controller — the hub that wires model ↔ views.
             var controllerGo = new GameObject("BattleController");
             var controller = controllerGo.AddComponent<BattleController>();
@@ -216,6 +282,7 @@ namespace DuskWarung.EditorTools
             DuskEditorUtil.WireObject(controller, "enemyView", enemyView);
             DuskEditorUtil.WireObject(controller, "backgroundRenderer", bgSr);
             DuskEditorUtil.WireObject(controller, "hud", hud);
+            DuskEditorUtil.WireObject(controller, "hudGroup", hud.GetComponent<CanvasGroup>());
             DuskEditorUtil.WireObject(controller, "commandMenu", menu);
             DuskEditorUtil.WireObject(controller, "damagePopupPrefab", damagePopup);
             DuskEditorUtil.WireObject(controller, "loader", loader);
@@ -231,28 +298,35 @@ namespace DuskWarung.EditorTools
         {
             Canvas canvas = MakeCanvas("BattleHUD");
             var hud = canvas.gameObject.AddComponent<BattleHUD>();
+            canvas.gameObject.AddComponent<CanvasGroup>(); // BattleController hides this during narrative
 
-            // Player panel (bottom-left).
+            // Player panel (bottom-left): portrait + name + HP/MP bars + numbers, with a clear hierarchy.
             RectTransform playerPanel = Panel(canvas.transform, "PlayerPanel", new Vector2(0f, 0f), new Vector2(0f, 0f),
-                new Vector2(0f, 0f), new Vector2(20, 20), new Vector2(300, 110));
-            TextMeshProUGUI pName = AddChildText(playerPanel, "Name", "Traveller", _fontBody, 6f, new Vector2(10, -8), new Vector2(200, 24));
-            Image pHp = Bar(playerPanel, "HpBar", new Color(0.3f, 0.85f, 0.35f), new Vector2(10, -34), new Vector2(280, 18));
-            Image pMp = Bar(playerPanel, "MpBar", new Color(0.3f, 0.55f, 0.95f), new Vector2(10, -58), new Vector2(280, 14));
-            TextMeshProUGUI pHpLabel = AddChildText(playerPanel, "HpLabel", "30/30", _fontNumbers, 5f, new Vector2(10, -78), new Vector2(140, 20));
-            TextMeshProUGUI pMpLabel = AddChildText(playerPanel, "MpLabel", "10/10", _fontNumbers, 5f, new Vector2(160, -78), new Vector2(140, 20));
+                new Vector2(0f, 0f), new Vector2(28, 28), new Vector2(432, 132));
+            Portrait(playerPanel, "Portrait", DuskEditorUtil.PlayerFaceset, new Vector2(14, -14), new Vector2(92, 92));
+            TextMeshProUGUI pName = AddChildText(playerPanel, "Name", "Traveller", _fontBody, 7f, new Vector2(120, -12), new Vector2(230, 28));
+            Image pHp = Bar(playerPanel, "HpBar", new Color(0.36f, 0.85f, 0.42f), new Vector2(120, -54), new Vector2(228, 20), out Image pHpGhost);
+            TextMeshProUGUI pHpLabel = AddChildText(playerPanel, "HpLabel", "30/30", _fontNumbers, 5.5f, new Vector2(354, -54), new Vector2(70, 20));
+            Image pMp = Bar(playerPanel, "MpBar", new Color(0.36f, 0.6f, 0.95f), new Vector2(120, -82), new Vector2(228, 16), out Image pMpGhost);
+            TextMeshProUGUI pMpLabel = AddChildText(playerPanel, "MpLabel", "10/10", _fontNumbers, 5f, new Vector2(354, -82), new Vector2(70, 16));
+            SlideIn(playerPanel, new Vector2(0f, -48f), 0.05f);
 
-            // Enemy panel (top-right).
+            // Enemy panel (top-right): name + HP bar + portrait.
             RectTransform enemyPanel = Panel(canvas.transform, "EnemyPanel", new Vector2(1f, 1f), new Vector2(1f, 1f),
-                new Vector2(1f, 1f), new Vector2(-20, -20), new Vector2(300, 70));
-            TextMeshProUGUI eName = AddChildText(enemyPanel, "Name", "Genderuwo", _fontBody, 6f, new Vector2(10, -8), new Vector2(200, 24));
-            Image eHp = Bar(enemyPanel, "HpBar", new Color(0.85f, 0.3f, 0.3f), new Vector2(10, -34), new Vector2(280, 18));
+                new Vector2(1f, 1f), new Vector2(-28, -28), new Vector2(404, 96));
+            Portrait(enemyPanel, "Portrait", DuskEditorUtil.SpritesDir + "/Enemy_Genderuwo/Faceset.png", new Vector2(324, -14), new Vector2(68, 68));
+            TextMeshProUGUI eName = AddChildText(enemyPanel, "Name", "Genderuwo", _fontBody, 7f, new Vector2(16, -12), new Vector2(300, 28));
+            Image eHp = Bar(enemyPanel, "HpBar", new Color(0.88f, 0.34f, 0.34f), new Vector2(16, -54), new Vector2(296, 20), out Image eHpGhost);
+            SlideIn(enemyPanel, new Vector2(0f, 48f), 0.05f);
 
             DuskEditorUtil.WireObject(hud, "playerHpFill", pHp);
+            DuskEditorUtil.WireObject(hud, "playerHpGhost", pHpGhost);
             DuskEditorUtil.WireObject(hud, "playerMpFill", pMp);
             DuskEditorUtil.WireObject(hud, "playerNameLabel", pName);
             DuskEditorUtil.WireObject(hud, "playerHpLabel", pHpLabel);
             DuskEditorUtil.WireObject(hud, "playerMpLabel", pMpLabel);
             DuskEditorUtil.WireObject(hud, "enemyHpFill", eHp);
+            DuskEditorUtil.WireObject(hud, "enemyHpGhost", eHpGhost);
             DuskEditorUtil.WireObject(hud, "enemyNameLabel", eName);
             return hud;
         }
@@ -270,6 +344,7 @@ namespace DuskWarung.EditorTools
             Button item = MenuButton(root, "ItemButton", "Item", new Vector2(10, -110));
             Button run = MenuButton(root, "RunButton", "Run", new Vector2(10, -160));
             TextMeshProUGUI tooltip = AddChildText(root, "Tooltip", "", _fontBody, 4.5f, new Vector2(10, -200), new Vector2(200, 40));
+            SlideIn(root, new Vector2(80f, 0f), 0.12f);
 
             var sfx = canvas.gameObject.AddComponent<AudioSource>();
             sfx.playOnAwake = false;
@@ -492,7 +567,7 @@ namespace DuskWarung.EditorTools
             var image = go.AddComponent<Image>();
             image.sprite = _uiSprite;
             image.type = Image.Type.Sliced;
-            image.color = new Color(0f, 0f, 0f, 0.55f);
+            image.color = new Color(0.05f, 0.05f, 0.08f, 0.72f);
             RectTransform rt = image.rectTransform;
             rt.anchorMin = anchorMin;
             rt.anchorMax = anchorMax;
@@ -502,29 +577,181 @@ namespace DuskWarung.EditorTools
             return rt;
         }
 
-        private static Image Bar(Transform parent, string name, Color color, Vector2 anchoredPos, Vector2 size)
+        private static Image Bar(Transform parent, string name, Color color, Vector2 anchoredPos, Vector2 size, out Image ghost)
         {
-            // background
+            // Dark frame/background.
             var bgGo = new GameObject(name + "_BG", typeof(RectTransform));
             bgGo.transform.SetParent(parent, false);
             var bg = bgGo.AddComponent<Image>();
             bg.sprite = _uiSprite;
             bg.type = Image.Type.Sliced;
-            bg.color = new Color(0.1f, 0.1f, 0.1f, 0.9f);
+            bg.color = new Color(0.05f, 0.05f, 0.07f, 0.95f);
             SetTopLeft(bg.rectTransform, anchoredPos, size);
 
-            // fill
-            var fillGo = new GameObject(name, typeof(RectTransform));
-            fillGo.transform.SetParent(bgGo.transform, false);
-            var fill = fillGo.AddComponent<Image>();
-            fill.sprite = _uiSprite;
-            fill.type = Image.Type.Filled;
-            fill.fillMethod = Image.FillMethod.Horizontal;
-            fill.fillOrigin = (int)Image.OriginHorizontal.Left;
-            fill.color = color;
-            fill.fillAmount = 1f;
-            Stretch(fill.rectTransform);
+            // Pale "ghost" behind the fill (drains slowly → the damage chip). Added first ⇒ rendered behind.
+            ghost = FilledBar(bgGo.transform, name + "_Ghost", new Color(1f, 1f, 1f, 0.5f));
+            // Coloured fill on top. sprite = null ⇒ a SOLID rectangle, so every fillAmount is visible and
+            // crisp — fixes the "empty even though HP remains" bug the rounded UISprite caused as a Filled image.
+            Image fill = FilledBar(bgGo.transform, name, color);
             return fill;
+        }
+
+        private static Image FilledBar(Transform parent, string name, Color color)
+        {
+            var go = new GameObject(name, typeof(RectTransform));
+            go.transform.SetParent(parent, false);
+            var img = go.AddComponent<Image>();
+            // A SOLID white sprite (not the rounded UISprite, and not null — a null sprite makes a Filled
+            // image ignore fillAmount) so every fraction renders as a crisp rectangle. Fixes the empty-bar bug.
+            img.sprite = WhiteSprite();
+            img.type = Image.Type.Filled;
+            img.fillMethod = Image.FillMethod.Horizontal;
+            img.fillOrigin = (int)Image.OriginHorizontal.Left;
+            img.color = color;
+            img.fillAmount = 1f;
+            RectTransform rt = img.rectTransform;
+            rt.anchorMin = Vector2.zero;
+            rt.anchorMax = Vector2.one;
+            rt.offsetMin = new Vector2(2f, 2f);   // thin dark frame around the fill
+            rt.offsetMax = new Vector2(-2f, -2f);
+            return img;
+        }
+
+        /// <summary>A solid white sprite asset (generated once) for crisp Filled bars. Point-filtered, uncompressed.</summary>
+        private static Sprite WhiteSprite()
+        {
+            if (_whiteSprite != null)
+            {
+                return _whiteSprite;
+            }
+
+            string path = DuskEditorUtil.UiDir + "/WhitePixel.png";
+            _whiteSprite = AssetDatabase.LoadAssetAtPath<Sprite>(path);
+            if (_whiteSprite != null)
+            {
+                return _whiteSprite;
+            }
+
+            DuskEditorUtil.EnsureFolder(DuskEditorUtil.UiDir);
+            var tex = new Texture2D(4, 4, TextureFormat.RGBA32, false);
+            var pixels = new Color32[16];
+            for (int i = 0; i < pixels.Length; i++)
+            {
+                pixels[i] = new Color32(255, 255, 255, 255);
+            }
+
+            tex.SetPixels32(pixels);
+            tex.Apply();
+            File.WriteAllBytes(path, tex.EncodeToPNG());
+            Object.DestroyImmediate(tex);
+            AssetDatabase.ImportAsset(path);
+
+            if (AssetImporter.GetAtPath(path) is TextureImporter importer)
+            {
+                importer.textureType = TextureImporterType.Sprite;
+                importer.spriteImportMode = SpriteImportMode.Single;
+                importer.filterMode = FilterMode.Point;
+                importer.textureCompression = TextureImporterCompression.Uncompressed;
+                importer.SaveAndReimport();
+            }
+
+            _whiteSprite = AssetDatabase.LoadAssetAtPath<Sprite>(path);
+            return _whiteSprite;
+        }
+
+        private static Image Portrait(Transform parent, string name, string spritePath, Vector2 topLeft, Vector2 size)
+        {
+            // Dark frame behind the portrait for a little depth.
+            var frameGo = new GameObject(name + "_Frame", typeof(RectTransform));
+            frameGo.transform.SetParent(parent, false);
+            var frame = frameGo.AddComponent<Image>();
+            frame.sprite = _uiSprite;
+            frame.type = Image.Type.Sliced;
+            frame.color = new Color(0f, 0f, 0f, 0.5f);
+            SetTopLeft(frame.rectTransform, topLeft, size);
+
+            var go = new GameObject(name, typeof(RectTransform));
+            go.transform.SetParent(frameGo.transform, false);
+            var img = go.AddComponent<Image>();
+            Sprite sprite = DuskEditorUtil.FirstSprite(spritePath);
+            if (sprite != null)
+            {
+                img.sprite = sprite;
+            }
+
+            img.preserveAspect = true;
+            RectTransform rt = img.rectTransform;
+            rt.anchorMin = Vector2.zero;
+            rt.anchorMax = Vector2.one;
+            rt.offsetMin = new Vector2(4f, 4f);
+            rt.offsetMax = new Vector2(-4f, -4f);
+            return img;
+        }
+
+        private static void SlideIn(RectTransform rt, Vector2 fromOffset, float delay)
+        {
+            var slide = rt.gameObject.AddComponent<UISlideIn>();
+            var so = new SerializedObject(slide);
+            so.FindProperty("fromOffset").vector2Value = fromOffset;
+            so.FindProperty("delay").floatValue = delay;
+            so.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        // ---------------------------------------------------------------- dialogue actors
+
+        /// <summary>
+        /// Spawns the styled SayDialog (falling back to Fungus's default if tool 10 hasn't produced ours yet)
+        /// and a holder of Fungus <see cref="Fungus.Character"/> assets for this scene's speakers. Fungus then
+        /// shows each speaker's name plate + portrait automatically; the designer only assigns the character.
+        /// </summary>
+        private static void BuildDialogueActors(params (string name, string facesetPath, Color color)[] characters)
+        {
+            Fungus.SayDialog dialog = null;
+            var sayPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(DuskEditorUtil.PrefabsDir + "/UI/SayDialog.prefab");
+            if (sayPrefab != null)
+            {
+                var go = (GameObject)PrefabUtility.InstantiatePrefab(sayPrefab);
+                dialog = go.GetComponentInChildren<Fungus.SayDialog>(true);
+            }
+
+            // Styled choice menu (Fungus Menu commands auto-find an active MenuDialog in the scene).
+            var menuPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(DuskEditorUtil.PrefabsDir + "/UI/MenuDialog.prefab");
+            if (menuPrefab != null)
+            {
+                PrefabUtility.InstantiatePrefab(menuPrefab);
+            }
+
+            var holder = new GameObject("Characters");
+            foreach ((string name, string facesetPath, Color color) in characters)
+            {
+                MakeCharacter(holder.transform, name, facesetPath, color, dialog);
+            }
+        }
+
+        private static void MakeCharacter(Transform parent, string charName, string facesetPath, Color nameColor, Fungus.SayDialog dialog)
+        {
+            var go = new GameObject("Char_" + charName.Replace(" ", string.Empty));
+            go.transform.SetParent(parent, false);
+            var ch = go.AddComponent<Fungus.Character>();
+
+            var so = new SerializedObject(ch);
+            so.FindProperty("nameText").stringValue = charName;
+            so.FindProperty("nameColor").colorValue = nameColor;
+            if (dialog != null)
+            {
+                so.FindProperty("setSayDialog").objectReferenceValue = dialog;
+            }
+
+            SerializedProperty portraits = so.FindProperty("portraits");
+            portraits.ClearArray();
+            Sprite face = DuskEditorUtil.FirstSprite(facesetPath);
+            if (face != null)
+            {
+                portraits.InsertArrayElementAtIndex(0);
+                portraits.GetArrayElementAtIndex(0).objectReferenceValue = face;
+            }
+
+            so.ApplyModifiedPropertiesWithoutUndo();
         }
 
         private static Button MenuButton(Transform parent, string name, string label, Vector2 anchoredPos)
@@ -534,13 +761,23 @@ namespace DuskWarung.EditorTools
             var image = go.AddComponent<Image>();
             image.sprite = _uiSprite;
             image.type = Image.Type.Sliced;
-            image.color = new Color(0.85f, 0.82f, 0.7f, 1f);
-            SetTopLeft(image.rectTransform, anchoredPos, new Vector2(200, 40));
+            image.color = new Color(0.9f, 0.86f, 0.74f, 1f);
+            SetTopLeft(image.rectTransform, anchoredPos, new Vector2(200, 44));
             var button = go.AddComponent<Button>();
             button.targetGraphic = image;
 
-            var text = AddChildText(image.rectTransform, "Label", label, _fontBody, 6f, Vector2.zero, new Vector2(200, 40));
-            text.color = Color.black;
+            // Colour transitions give hover/press feedback without any wiring.
+            ColorBlock colors = button.colors;
+            colors.normalColor = new Color(0.9f, 0.86f, 0.74f, 1f);
+            colors.highlightedColor = new Color(1f, 0.95f, 0.72f, 1f);
+            colors.pressedColor = new Color(0.74f, 0.67f, 0.5f, 1f);
+            colors.selectedColor = colors.highlightedColor;
+            colors.disabledColor = new Color(0.42f, 0.42f, 0.45f, 0.55f);
+            colors.fadeDuration = 0.08f;
+            button.colors = colors;
+
+            var text = AddChildText(image.rectTransform, "Label", label, _fontBody, 6f, Vector2.zero, new Vector2(200, 44));
+            text.color = new Color(0.12f, 0.1f, 0.08f);
             text.alignment = TextAlignmentOptions.Center;
             Stretch(text.rectTransform);
             return button;

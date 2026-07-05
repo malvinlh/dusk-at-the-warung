@@ -1,4 +1,5 @@
 using System.Collections;
+using DG.Tweening;
 using DuskWarung.Core;
 using DuskWarung.FungusCommands;
 using UnityEngine;
@@ -26,6 +27,8 @@ namespace DuskWarung.Battle.View
 
         [Header("UI")]
         [SerializeField] private BattleHUD hud;
+        [SerializeField, Tooltip("CanvasGroup on the HUD canvas; hidden during narrative so dialogue has focus.")]
+        private CanvasGroup hudGroup;
         [SerializeField] private CommandMenuUI commandMenu;
         [SerializeField] private DamagePopup damagePopupPrefab;
         [SerializeField, Tooltip("Optional parent for spawned popups (leave empty for world root).")]
@@ -75,9 +78,28 @@ namespace DuskWarung.Battle.View
             if (hud != null) hud.Bind(_machine);
             if (commandMenu != null) commandMenu.Initialize(this);
 
+            SetHudVisible(false, instant: true); // keep the intro dialogue clean; revealed when combat begins
+
             _machine.OnStateChanged += HandleStateChanged;
             _machine.OnActionResolved += HandleActionResolved;
             _machine.OnBattleEnded += HandleBattleEnded;
+
+            StartCoroutine(IntroThenBattle());
+        }
+
+        /// <summary>
+        /// Waits until the scene-transition overlay has finished revealing the battle scene, THEN plays the
+        /// intro dialog. Deferring the dialog until the scene is fully visible removes the execution-order
+        /// race between this <c>Start()</c> and Fungus's lazily-built SayDialog — the intro can no longer
+        /// pop into view a frame or two after the fade-in (the "dialogue flash").
+        /// </summary>
+        private IEnumerator IntroThenBattle()
+        {
+            // Instance auto-creates (non-busy) if the Battle scene is played directly, so this is safe.
+            while (SceneTransition.Instance.IsBusy)
+            {
+                yield return null;
+            }
 
             if (fungus != null && !string.IsNullOrEmpty(introBlock))
             {
@@ -111,8 +133,34 @@ namespace DuskWarung.Battle.View
 
         private void BeginBattle()
         {
+            SetHudVisible(true); // combat starting — bring the HP/MP HUD back
             _active = true;
             _machine.Start();
+        }
+
+        /// <summary>
+        /// Shows or hides the HP/MP HUD. Hidden during narrative (intro / victory / defeat) so the dialogue
+        /// and portraits carry the focus — the Persona-style "clear the screen for the conversation" idea —
+        /// then faded back for combat. View-only; the model is untouched.
+        /// </summary>
+        private void SetHudVisible(bool visible, bool instant = false)
+        {
+            if (hudGroup == null)
+            {
+                return;
+            }
+
+            hudGroup.DOKill();
+            if (instant)
+            {
+                hudGroup.alpha = visible ? 1f : 0f;
+            }
+            else
+            {
+                hudGroup.DOFade(visible ? 1f : 0f, 0.25f);
+            }
+
+            hudGroup.blocksRaycasts = visible;
         }
 
         /// <summary>Receives the player's chosen command from the command menu.</summary>
@@ -242,6 +290,7 @@ namespace DuskWarung.Battle.View
 
             if (fungus != null && !string.IsNullOrEmpty(block))
             {
+                SetHudVisible(false); // clear the HUD for the closing line
                 bool done = false;
                 fungus.ExecuteBlock(block, () => done = true);
                 yield return new WaitUntil(() => done);

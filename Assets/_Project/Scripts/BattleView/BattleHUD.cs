@@ -16,6 +16,9 @@ namespace DuskWarung.Battle.View
         [SerializeField, Tooltip("Image (type = Filled) for player HP.")]
         private Image playerHpFill;
 
+        [SerializeField, Tooltip("Optional pale 'ghost' bar behind the HP fill that drains slowly to show the damage chip.")]
+        private Image playerHpGhost;
+
         [SerializeField, Tooltip("Image (type = Filled) for player MP.")]
         private Image playerMpFill;
 
@@ -27,9 +30,19 @@ namespace DuskWarung.Battle.View
         [SerializeField, Tooltip("Image (type = Filled) for enemy HP.")]
         private Image enemyHpFill;
 
+        [SerializeField, Tooltip("Optional pale 'ghost' bar behind the enemy HP fill (damage chip).")]
+        private Image enemyHpGhost;
+
         [SerializeField] private TMP_Text enemyNameLabel;
 
-        [SerializeField] private float tweenDuration = 0.3f;
+        [SerializeField, Tooltip("How fast the coloured fill snaps to the new value.")]
+        private float tweenDuration = 0.18f;
+
+        [SerializeField, Tooltip("How slowly the ghost chip drains behind it (the recent-damage streak).")]
+        private float ghostDuration = 0.45f;
+
+        [SerializeField, Tooltip("Delay before the ghost chip starts draining, so the hit reads.")]
+        private float ghostDelay = 0.18f;
 
         private BattleStateMachine _machine;
 
@@ -74,8 +87,8 @@ namespace DuskWarung.Battle.View
         private void RefreshPlayer(bool instant)
         {
             BattlerRuntime p = _machine.Player;
-            SetFill(playerHpFill, Ratio(p.Hp, p.MaxHp), instant);
-            SetFill(playerMpFill, Ratio(p.Mp, p.MaxMp), instant);
+            SetFill(playerHpFill, playerHpGhost, Ratio(p.Hp, p.MaxHp), instant);
+            SetFill(playerMpFill, null, Ratio(p.Mp, p.MaxMp), instant);
             SetText(playerHpLabel, $"{p.Hp}/{p.MaxHp}");
             SetText(playerMpLabel, $"{p.Mp}/{p.MaxMp}");
         }
@@ -83,12 +96,17 @@ namespace DuskWarung.Battle.View
         private void RefreshEnemy(bool instant)
         {
             BattlerRuntime e = _machine.Enemy;
-            SetFill(enemyHpFill, Ratio(e.Hp, e.MaxHp), instant);
+            SetFill(enemyHpFill, enemyHpGhost, Ratio(e.Hp, e.MaxHp), instant);
         }
 
         private static float Ratio(int value, int max) => max > 0 ? Mathf.Clamp01(value / (float)max) : 0f;
 
-        private void SetFill(Image fill, float target, bool instant)
+        /// <summary>
+        /// Drives a bar to <paramref name="target"/>. The coloured <paramref name="fill"/> snaps quickly; the
+        /// optional <paramref name="ghost"/> behind it snaps up on a heal but drains slowly on damage, so the
+        /// exposed streak reads as a "damage chip" — a cheap, standard bit of JRPG game feel.
+        /// </summary>
+        private void SetFill(Image fill, Image ghost, float target, bool instant)
         {
             if (fill == null)
             {
@@ -103,6 +121,21 @@ namespace DuskWarung.Battle.View
             else
             {
                 fill.DOFillAmount(target, tweenDuration).SetEase(Ease.OutQuad);
+            }
+
+            if (ghost == null)
+            {
+                return;
+            }
+
+            ghost.DOKill();
+            if (instant || target >= ghost.fillAmount)
+            {
+                ghost.fillAmount = target; // init or heal: no chip
+            }
+            else
+            {
+                ghost.DOFillAmount(target, ghostDuration).SetDelay(ghostDelay).SetEase(Ease.InQuad);
             }
         }
 
