@@ -421,8 +421,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "WASD / Arrows \u2014 Move        Space / Left Click \u2014 Interact /
-    Confirm"
+  m_text: "WASD / Arrows \u2014 Move        Space / Click \u2014 Interact"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8b891630aee6c4149a4303e38146ce1c, type: 2}
   m_sharedMaterial: {fileID: -1489820059579506693, guid: 8b891630aee6c4149a4303e38146ce1c, type: 2}
@@ -1677,7 +1676,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Press Space to begin
+  m_text: Press Space or Click to begin
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8b891630aee6c4149a4303e38146ce1c, type: 2}
   m_sharedMaterial: {fileID: -1489820059579506693, guid: 8b891630aee6c4149a4303e38146ce1c, type: 2}

@@ -90,7 +90,7 @@ namespace DuskWarung.EditorTools
             {
                 var rt = (RectTransform)continueButton.transform;
                 rt.sizeDelta = new Vector2(48f, 48f);
-                rt.anchoredPosition = new Vector2(-30f, 30f);
+                rt.anchoredPosition = new Vector2(-30f, 58f);
             }
 
             if (so.FindProperty("nameText").objectReferenceValue is Text nameText)
@@ -101,7 +101,7 @@ namespace DuskWarung.EditorTools
                 RectTransform rt = nameText.rectTransform;
                 rt.anchorMin = rt.anchorMax = new Vector2(0f, 1f);
                 rt.pivot = new Vector2(0f, 1f);
-                rt.anchoredPosition = new Vector2(48f, -28f);
+                rt.anchoredPosition = new Vector2(48f, -12f);
                 rt.sizeDelta = new Vector2(760f, 58f);
             }
         }

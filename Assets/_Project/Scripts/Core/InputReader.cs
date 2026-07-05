@@ -13,7 +13,7 @@ namespace DuskWarung.Core
         /// <summary>Raw movement axis in [-1, 1] per component, from WASD/Arrows.</summary>
         public Vector2 MoveAxis { get; private set; }
 
-        /// <summary>True on the frame the interact (Space) button is pressed.</summary>
+        /// <summary>True on the frame the interact button (Space or left-click) is pressed.</summary>
         public bool InteractPressed { get; private set; }
 
         /// <summary>Whether player-driven input is currently accepted.</summary>
@@ -57,7 +57,7 @@ namespace DuskWarung.Core
             }
 
             MoveAxis = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
-            InteractPressed = Input.GetKeyDown(KeyCode.Space);
+            InteractPressed = Input.GetKeyDown(KeyCode.Space) || Input.GetMouseButtonDown(0);
         }
     }
 }

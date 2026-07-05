@@ -61,7 +61,9 @@ namespace DuskWarung.EditorTools
         {
             InitSharedAssets();
             BuildBattle();
-            Debug.Log("[Dusk] Battle scene rebuilt (map-safe — the Overworld tilemap is untouched).");
+            // BuildBattle recreates an empty Flowchart, so re-seed the battle dialogue it wiped.
+            FungusDialogueTool.SeedBattleDialogue();
+            Debug.Log("[Dusk] Battle scene rebuilt + dialogue re-seeded (map-safe — the Overworld tilemap is untouched).");
         }
 
         private static void InitSharedAssets()
@@ -69,6 +71,42 @@ namespace DuskWarung.EditorTools
             _uiSprite = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/UISprite.psd");
             _fontBody = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(DuskEditorUtil.FontM5x7);
             _fontNumbers = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(DuskEditorUtil.FontMonogram);
+        }
+
+        /// <summary>
+        /// Rewrites only the on-screen control-hint strings in the Title and Overworld scenes (leaving the
+        /// painted map and edited dialogue untouched), so the hints match the "Space or Click" controls.
+        /// </summary>
+        [MenuItem("Tools/Dusk Warung/6c. Update Control Hints (map-safe)", priority = 62)]
+        public static void UpdateControlHints()
+        {
+            Scene title = EditorSceneManager.OpenScene(DuskEditorUtil.ScenesDir + "/Title.unity", OpenSceneMode.Single);
+            SetTmpTextByName("Prompt", "Press Space or Click to begin");
+            SetTmpTextByName("Controls", "WASD / Arrows — Move        Space / Click — Interact");
+            EditorSceneManager.MarkSceneDirty(title);
+            EditorSceneManager.SaveScene(title);
+
+            Scene overworld = EditorSceneManager.OpenScene(DuskEditorUtil.ScenesDir + "/Overworld.unity", OpenSceneMode.Single);
+            SetTmpTextByName("Hint", "WASD / Arrows — Move   ·   Space / Click — Talk");
+            EditorSceneManager.MarkSceneDirty(overworld);
+            EditorSceneManager.SaveScene(overworld);
+
+            Debug.Log("[Dusk] Control hints updated in Title + Overworld (map-safe — nothing else touched).");
+        }
+
+        private static void SetTmpTextByName(string goName, string text)
+        {
+            foreach (TextMeshProUGUI tmp in Object.FindObjectsByType<TextMeshProUGUI>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            {
+                if (tmp.gameObject.name == goName)
+                {
+                    tmp.text = text;
+                    EditorUtility.SetDirty(tmp);
+                    return;
+                }
+            }
+
+            Debug.LogWarning($"[Dusk] Control-hint text object '{goName}' not found in the open scene.");
         }
 
         // ---------------------------------------------------------------- Title / End
@@ -95,13 +133,13 @@ namespace DuskWarung.EditorTools
                 _fontBody, 5f, TextAlignmentOptions.Center, new Vector2(0.5f, 0.55f), new Vector2(700, 50));
             subtitle.color = new Color(0.82f, 0.78f, 0.72f);
 
-            TextMeshProUGUI prompt = AddText(canvas.transform, "Prompt", "Press Space to begin", _fontBody, 6.5f,
-                TextAlignmentOptions.Center, new Vector2(0.5f, 0.34f), new Vector2(600, 60));
+            TextMeshProUGUI prompt = AddText(canvas.transform, "Prompt", "Press Space or Click to begin", _fontBody, 6.5f,
+                TextAlignmentOptions.Center, new Vector2(0.5f, 0.34f), new Vector2(700, 60));
             prompt.color = new Color(1f, 0.96f, 0.85f);
 
             // In-game controls hint — a recruiter playing the build shouldn't need the README to move.
             TextMeshProUGUI controls = AddText(canvas.transform, "Controls",
-                "WASD / Arrows — Move        Space — Interact / Confirm", _fontBody, 4.2f,
+                "WASD / Arrows — Move        Space / Click — Interact", _fontBody, 4.2f,
                 TextAlignmentOptions.Center, new Vector2(0.5f, 0.2f), new Vector2(1200, 50));
             controls.color = new Color(0.75f, 0.75f, 0.8f);
 
@@ -237,7 +275,7 @@ namespace DuskWarung.EditorTools
             Canvas hintCanvas = MakeCanvas("HintCanvas");
             RectTransform hintBar = Panel(hintCanvas.transform, "HintBar", new Vector2(0.5f, 0f), new Vector2(0.5f, 0f),
                 new Vector2(0.5f, 0f), new Vector2(0f, 44f), new Vector2(600, 46));
-            TextMeshProUGUI hint = AddChildText(hintBar, "Hint", "WASD / Arrows — Move      ·      Space — Talk",
+            TextMeshProUGUI hint = AddChildText(hintBar, "Hint", "WASD / Arrows — Move   ·   Space / Click — Talk",
                 _fontBody, 4.5f, Vector2.zero, new Vector2(580, 42));
             hint.alignment = TextAlignmentOptions.Center;
             hint.color = new Color(1f, 0.97f, 0.88f);

@@ -32,6 +32,14 @@ namespace DuskWarung.EditorTools
             Debug.Log("[Dusk] Seeded sample dialogue (Overworld: TalkToSari/GroveApproach/Defeat; Battle: BattleIntro/Victory). Edit it in the Fungus Flowchart Window from now on.");
         }
 
+        /// <summary>Re-seeds only the Battle scene's dialogue (used to restore it after a Battle-scene rebuild), leaving Overworld dialogue untouched.</summary>
+        [MenuItem("Tools/Dusk Warung/7b. Seed Battle Dialogue Only", priority = 71)]
+        public static void SeedBattleDialogue()
+        {
+            AuthorBattle();
+            Debug.Log("[Dusk] Re-seeded Battle dialogue (BattleIntro/Victory). Overworld dialogue untouched.");
+        }
+
         private static void AuthorOverworld()
         {
             Scene scene = EditorSceneManager.OpenScene(DuskEditorUtil.ScenesDir + "/Overworld.unity", OpenSceneMode.Single);
