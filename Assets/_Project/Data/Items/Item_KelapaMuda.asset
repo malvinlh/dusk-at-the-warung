@@ -15,4 +15,4 @@ MonoBehaviour:
   displayName: Kelapa Muda
   healAmount: 12
   tooltip: Restores a little HP. Refreshing.
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 6bcd7f654a1cc2a4b9087e8abc4e3ae3, type: 3}
