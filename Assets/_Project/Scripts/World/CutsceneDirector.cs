@@ -59,14 +59,34 @@ namespace DuskWarung.World
             }
 
             player.SetControlEnabled(false);
+            SetNpcCollisionIgnored(true); // NPCs stay solid while exploring, but must not block the scripted walk
 
             foreach (Step step in steps)
             {
                 yield return RunStep(step);
             }
 
+            SetNpcCollisionIgnored(false);
             player.ClearScriptedInput();
             player.SetControlEnabled(true);
+        }
+
+        /// <summary>Toggles collision between the player and every NPC, so a scripted walk can't stall on one.</summary>
+        private void SetNpcCollisionIgnored(bool ignore)
+        {
+            var playerCollider = player.GetComponent<Collider2D>();
+            if (playerCollider == null)
+            {
+                return;
+            }
+
+            foreach (NpcInteractable npc in Object.FindObjectsByType<NpcInteractable>(FindObjectsSortMode.None))
+            {
+                if (npc.TryGetComponent(out Collider2D npcCollider))
+                {
+                    Physics2D.IgnoreCollision(playerCollider, npcCollider, ignore);
+                }
+            }
         }
 
         private IEnumerator RunStep(Step step)

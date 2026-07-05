@@ -845,8 +845,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "You reached the next village at dusk's end.\nThe pisang goreng was, in
-    fact, worth it.\n\n\u2014 The End (Vertical Slice) \u2014"
+  m_text: "You reached the next village at dusk's end.\nThe rengginang was, in fact,
+    worth it.\n\n\u2014 The End (Vertical Slice) \u2014"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8b891630aee6c4149a4303e38146ce1c, type: 2}
   m_sharedMaterial: {fileID: -1489820059579506693, guid: 8b891630aee6c4149a4303e38146ce1c, type: 2}

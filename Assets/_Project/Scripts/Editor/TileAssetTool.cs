@@ -13,7 +13,7 @@ namespace DuskWarung.EditorTools
     {
         private static readonly string[] Sheets =
         {
-            "TilesetFloor", "TilesetNature", "TilesetVillageAbandoned", "TilesetHouse"
+            "TilesetFloor", "TilesetNature", "TilesetHouse"
         };
 
         [MenuItem("Tools/Dusk Warung/2. Create Tile Assets", priority = 2)]

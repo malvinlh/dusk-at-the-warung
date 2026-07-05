@@ -1,6 +1,7 @@
 using DuskWarung.Battle;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace DuskWarung.Battle.View
@@ -47,11 +48,14 @@ namespace DuskWarung.Battle.View
         private BattlerRuntime _player;
         private SkillSO _skill;
         private ItemSlot _itemSlot;
+        private Button[] _buttons;
+        private int _lastIndex; // last submitted command; the keyboard cursor returns here (or the nearest usable button)
 
         /// <summary>Wires button callbacks once. Call from the controller on start.</summary>
         public void Initialize(BattleController controller)
         {
             _controller = controller;
+            _buttons = new[] { attackButton, skillButton, itemButton, runButton };
 
             AddClick(attackButton, OnAttack);
             AddClick(skillButton, OnSkill);
@@ -59,6 +63,22 @@ namespace DuskWarung.Battle.View
             AddClick(runButton, OnRun);
 
             Hide();
+        }
+
+        private void Update()
+        {
+            // While the menu is open, a nav key should re-focus the cursor if it was lost (e.g. by clicking
+            // empty space) — a plain click-away, with no key, still clears it.
+            if (root == null || !root.activeInHierarchy)
+            {
+                return;
+            }
+
+            EventSystem es = EventSystem.current;
+            if (es != null && !HasValidSelection(es) && NavKeyPressed())
+            {
+                SelectNearest(_lastIndex);
+            }
         }
 
         /// <summary>Shows the menu for the given player, refreshing gating and labels.</summary>
@@ -75,7 +95,69 @@ namespace DuskWarung.Battle.View
             {
                 root.SetActive(true);
             }
+
+            // Restore keyboard focus so WASD keeps working even after a button was disabled last turn.
+            SelectNearest(_lastIndex);
         }
+
+        /// <summary>Selects the interactable command button nearest to <paramref name="anchor"/> (keeps WASD alive).</summary>
+        private void SelectNearest(int anchor)
+        {
+            EventSystem es = EventSystem.current;
+            if (es == null || _buttons == null)
+            {
+                return;
+            }
+
+            for (int d = 0; d < _buttons.Length; d++)
+            {
+                int lo = anchor - d;
+                if (lo >= 0 && IsSelectable(_buttons[lo]))
+                {
+                    es.SetSelectedGameObject(_buttons[lo].gameObject);
+                    return;
+                }
+
+                int hi = anchor + d;
+                if (d > 0 && hi < _buttons.Length && IsSelectable(_buttons[hi]))
+                {
+                    es.SetSelectedGameObject(_buttons[hi].gameObject);
+                    return;
+                }
+            }
+        }
+
+        private static bool IsSelectable(Button button)
+            => button != null && button.interactable && button.gameObject.activeInHierarchy;
+
+        private bool HasValidSelection(EventSystem es)
+        {
+            int i = IndexOf(es.currentSelectedGameObject);
+            return i >= 0 && IsSelectable(_buttons[i]);
+        }
+
+        private int IndexOf(GameObject go)
+        {
+            if (_buttons == null || go == null)
+            {
+                return -1;
+            }
+
+            for (int i = 0; i < _buttons.Length; i++)
+            {
+                if (_buttons[i] != null && _buttons[i].gameObject == go)
+                {
+                    return i;
+                }
+            }
+
+            return -1;
+        }
+
+        private static bool NavKeyPressed() =>
+            Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.D) ||
+            Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.DownArrow) ||
+            Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.RightArrow);
 
         /// <summary>Hides the menu.</summary>
         public void Hide()
@@ -111,6 +193,7 @@ namespace DuskWarung.Battle.View
 
         private void OnAttack()
         {
+            _lastIndex = 0;
             PlayConfirm();
             Submit(BattleCommand.Attack(_player, _controller.Enemy));
         }
@@ -122,6 +205,7 @@ namespace DuskWarung.Battle.View
                 return;
             }
 
+            _lastIndex = 1;
             PlayConfirm();
             Submit(BattleCommand.UseSkill(_player, _controller.Enemy, _skill));
         }
@@ -133,12 +217,14 @@ namespace DuskWarung.Battle.View
                 return;
             }
 
+            _lastIndex = 2;
             PlayConfirm();
             Submit(BattleCommand.UseItem(_player, _itemSlot.Item));
         }
 
         private void OnRun()
         {
+            _lastIndex = 3;
             PlayConfirm();
             Submit(BattleCommand.Run(_player, _controller.Enemy));
         }

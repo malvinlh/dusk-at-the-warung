@@ -31,7 +31,7 @@ namespace DuskWarung.EditorTools
             ("Assets/Fonts/monogram/ttf/monogram.ttf", DuskEditorUtil.FontMonogram),
         };
 
-        [MenuItem("Tools/Dusk Warung/9. Rebuild Fonts", priority = 9)]
+        [MenuItem("Tools/Dusk Warung/3. Rebuild Fonts", priority = 3)]
         public static void Run()
         {
             int rebuilt = 0;
