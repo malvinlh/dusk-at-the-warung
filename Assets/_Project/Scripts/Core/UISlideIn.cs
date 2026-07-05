@@ -3,11 +3,8 @@ using UnityEngine;
 
 namespace DuskWarung.Core
 {
-    /// <summary>
-    /// Slides and fades a UI element into place on <see cref="Start"/>. A tiny, reusable bit of polish so
-    /// HUD panels and menus animate in instead of snapping — kept in the view layer where all timing lives.
-    /// Adds its own <see cref="CanvasGroup"/> if one is not present.
-    /// </summary>
+    /// <summary>Slides and fades a UI element into place on <see cref="Start"/> so panels animate in instead
+    /// of snapping. Adds a <see cref="CanvasGroup"/> if one is not present.</summary>
     [RequireComponent(typeof(RectTransform))]
     public class UISlideIn : MonoBehaviour
     {

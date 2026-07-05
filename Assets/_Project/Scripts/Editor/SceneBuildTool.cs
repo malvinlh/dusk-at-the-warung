@@ -34,9 +34,7 @@ namespace DuskWarung.EditorTools
         [MenuItem("Tools/Dusk Warung/6. Build Scenes", priority = 6)]
         public static void Run()
         {
-            _uiSprite = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/UISprite.psd");
-            _fontBody = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(DuskEditorUtil.FontM5x7);
-            _fontNumbers = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(DuskEditorUtil.FontMonogram);
+            InitSharedAssets();
 
             BuildTitle();
             BuildOverworld();
@@ -52,6 +50,25 @@ namespace DuskWarung.EditorTools
             });
 
             Debug.Log("[Dusk] Scenes built + registered in Build Settings. Author the Fungus dialogue and paint the map to finish.");
+        }
+
+        /// <summary>
+        /// Rebuilds only the Battle scene (which has no tilemap), so applying battle-UI changes — e.g. the
+        /// command icons — leaves the hand-painted Overworld map untouched.
+        /// </summary>
+        [MenuItem("Tools/Dusk Warung/6b. Rebuild Battle Scene (map-safe)", priority = 61)]
+        public static void RebuildBattleScene()
+        {
+            InitSharedAssets();
+            BuildBattle();
+            Debug.Log("[Dusk] Battle scene rebuilt (map-safe — the Overworld tilemap is untouched).");
+        }
+
+        private static void InitSharedAssets()
+        {
+            _uiSprite = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/UISprite.psd");
+            _fontBody = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(DuskEditorUtil.FontM5x7);
+            _fontNumbers = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(DuskEditorUtil.FontMonogram);
         }
 
         // ---------------------------------------------------------------- Title / End
@@ -339,12 +356,16 @@ namespace DuskWarung.EditorTools
             RectTransform root = Panel(canvas.transform, "Root", new Vector2(1f, 0f), new Vector2(1f, 0f),
                 new Vector2(1f, 0f), new Vector2(-20, 20), new Vector2(220, 210));
 
-            Button attack = MenuButton(root, "AttackButton", "Attack", new Vector2(10, -10));
-            Button skill = MenuButton(root, "SkillButton", "Skill", new Vector2(10, -60));
-            Button item = MenuButton(root, "ItemButton", "Item", new Vector2(10, -110));
-            Button run = MenuButton(root, "RunButton", "Run", new Vector2(10, -160));
+            Button attack = MenuButton(root, "AttackButton", "Attack", new Vector2(10, -10), out Image attackIcon);
+            Button skill = MenuButton(root, "SkillButton", "Skill", new Vector2(10, -60), out Image skillIcon);
+            Button item = MenuButton(root, "ItemButton", "Item", new Vector2(10, -110), out Image itemIcon);
+            Button run = MenuButton(root, "RunButton", "Run", new Vector2(10, -160), out Image runIcon);
             TextMeshProUGUI tooltip = AddChildText(root, "Tooltip", "", _fontBody, 4.5f, new Vector2(10, -200), new Vector2(200, 40));
             SlideIn(root, new Vector2(80f, 0f), 0.12f);
+
+            // Attack/Run use fixed icons; Skill/Item icons are driven at runtime by CommandMenuUI from the SO.
+            AssignIcon(attackIcon, DuskEditorUtil.SpritesDir + "/Icon/Attack.png");
+            AssignIcon(runIcon, DuskEditorUtil.SpritesDir + "/Icon/Run.png");
 
             var sfx = canvas.gameObject.AddComponent<AudioSource>();
             sfx.playOnAwake = false;
@@ -356,6 +377,8 @@ namespace DuskWarung.EditorTools
             DuskEditorUtil.WireObject(menu, "runButton", run);
             DuskEditorUtil.WireObject(menu, "skillLabel", skill.GetComponentInChildren<TextMeshProUGUI>());
             DuskEditorUtil.WireObject(menu, "itemLabel", item.GetComponentInChildren<TextMeshProUGUI>());
+            DuskEditorUtil.WireObject(menu, "skillIcon", skillIcon);
+            DuskEditorUtil.WireObject(menu, "itemIcon", itemIcon);
             DuskEditorUtil.WireObject(menu, "tooltipLabel", tooltip);
             DuskEditorUtil.WireObject(menu, "sfxSource", sfx);
             DuskEditorUtil.WireObject(menu, "confirmClip", FirstClipIn(DuskEditorUtil.AudioDir + "/SFX/Menu"));
@@ -688,6 +711,16 @@ namespace DuskWarung.EditorTools
             return img;
         }
 
+        private static void AssignIcon(Image icon, string spritePath)
+        {
+            Sprite sprite = DuskEditorUtil.FirstSprite(spritePath);
+            if (icon != null && sprite != null)
+            {
+                icon.sprite = sprite;
+                icon.enabled = true;
+            }
+        }
+
         private static void SlideIn(RectTransform rt, Vector2 fromOffset, float delay)
         {
             var slide = rt.gameObject.AddComponent<UISlideIn>();
@@ -754,7 +787,7 @@ namespace DuskWarung.EditorTools
             so.ApplyModifiedPropertiesWithoutUndo();
         }
 
-        private static Button MenuButton(Transform parent, string name, string label, Vector2 anchoredPos)
+        private static Button MenuButton(Transform parent, string name, string label, Vector2 anchoredPos, out Image icon)
         {
             var go = new GameObject(name, typeof(RectTransform));
             go.transform.SetParent(parent, false);
@@ -776,10 +809,22 @@ namespace DuskWarung.EditorTools
             colors.fadeDuration = 0.08f;
             button.colors = colors;
 
-            var text = AddChildText(image.rectTransform, "Label", label, _fontBody, 6f, Vector2.zero, new Vector2(200, 44));
+            // Icon on the left (assigned by the caller or driven by CommandMenuUI; hidden until it has a sprite).
+            var iconGo = new GameObject("Icon", typeof(RectTransform));
+            iconGo.transform.SetParent(image.rectTransform, false);
+            icon = iconGo.AddComponent<Image>();
+            icon.preserveAspect = true;
+            icon.raycastTarget = false;
+            icon.enabled = false;
+            SetTopLeft(icon.rectTransform, new Vector2(9, -7), new Vector2(30, 30));
+
+            // Label to the right of the icon; auto-sizes down so longer skill/item names still fit.
+            var text = AddChildText(image.rectTransform, "Label", label, _fontBody, 5f, new Vector2(48, 0), new Vector2(146, 44));
             text.color = new Color(0.12f, 0.1f, 0.08f);
-            text.alignment = TextAlignmentOptions.Center;
-            Stretch(text.rectTransform);
+            text.alignment = TextAlignmentOptions.Left;
+            text.enableAutoSizing = true;
+            text.fontSizeMin = 14;
+            text.fontSizeMax = 30;
             return button;
         }
 

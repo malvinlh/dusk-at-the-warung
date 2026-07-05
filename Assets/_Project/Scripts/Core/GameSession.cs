@@ -25,10 +25,8 @@ namespace DuskWarung.Core
         public static bool HasReturnPosition;
 
         /// <summary>
-        /// The game-wide event-flag layer (e.g. "met_bu_sari", "beat_genderuwo"). Progression gates read
-        /// these rather than hard-coding booleans on individual objects, so the story order scales to new
-        /// quests without touching systems code. Raised by designers from flowcharts via the "Set Flag"
-        /// Fungus command; read by gates such as <see cref="World.EncounterTrigger"/>.
+        /// Game-wide event flags (e.g. "met_bu_sari") that progression gates read instead of hard-coding
+        /// booleans. Raised from flowcharts via the "Set Flag" command; read by <see cref="World.EncounterTrigger"/>.
         /// </summary>
         public static readonly HashSet<string> StoryFlags = new HashSet<string>();
 

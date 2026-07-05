@@ -101,11 +101,8 @@ namespace DuskWarung.Battle.View
 
         private static float Ratio(int value, int max) => max > 0 ? Mathf.Clamp01(value / (float)max) : 0f;
 
-        /// <summary>
-        /// Drives a bar to <paramref name="target"/>. The coloured <paramref name="fill"/> snaps quickly; the
-        /// optional <paramref name="ghost"/> behind it snaps up on a heal but drains slowly on damage, so the
-        /// exposed streak reads as a "damage chip" — a cheap, standard bit of JRPG game feel.
-        /// </summary>
+        /// <summary>Drives a bar to <paramref name="target"/>: the <paramref name="fill"/> snaps, while the
+        /// optional <paramref name="ghost"/> behind it drains slowly on damage to show a "chip".</summary>
         private void SetFill(Image fill, Image ghost, float target, bool instant)
         {
             if (fill == null)

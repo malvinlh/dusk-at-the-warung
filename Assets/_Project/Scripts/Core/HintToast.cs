@@ -3,11 +3,8 @@ using UnityEngine;
 
 namespace DuskWarung.Core
 {
-    /// <summary>
-    /// A one-shot on-screen hint: fades in on <see cref="Start"/>, holds, then fades out and disables itself.
-    /// Used for the unobtrusive "WASD to move" reminder when the overworld first loads, so controls are
-    /// discoverable in-game without a persistent HUD element. Adds its own <see cref="CanvasGroup"/> if needed.
-    /// </summary>
+    /// <summary>One-shot hint that fades in on <see cref="Start"/>, holds, then fades out and disables itself
+    /// (the overworld's "WASD to move" reminder). Adds a <see cref="CanvasGroup"/> if one is not present.</summary>
     [RequireComponent(typeof(RectTransform))]
     public class HintToast : MonoBehaviour
     {

@@ -6,14 +6,10 @@ using UnityEngine;
 namespace DuskWarung.World
 {
     /// <summary>
-    /// A trigger volume (e.g. the grove mouth) that queues an encounter and loads the battle
-    /// scene once when the player enters. Also used as the free-roam fallback if the player
-    /// walks into the grove without the scripted cutscene.
-    ///
-    /// Progression is gated by a story flag: if <see cref="requiredFlag"/> is set and not yet raised on
-    /// <see cref="GameSession"/>, the trigger holds and (optionally) plays a nudge block instead of starting
-    /// the battle. This keeps the intended narrative order (talk to Bu Sari first) without hard-coding the
-    /// dependency — the gate reads the event-flag layer, which scales to any number of quests.
+    /// Trigger volume that queues an encounter and loads the battle scene once the player enters, as a
+    /// free-roam fallback. Gated by <see cref="requiredFlag"/>: if that flag isn't set on
+    /// <see cref="GameSession"/> the trigger holds (optionally playing a nudge block) so the intro order
+    /// (talk to Bu Sari first) is preserved without a hard-coded dependency.
     /// </summary>
     [RequireComponent(typeof(Collider2D))]
     public class EncounterTrigger : MonoBehaviour
@@ -60,10 +56,8 @@ namespace DuskWarung.World
                 return;
             }
 
-            // Only react to FREE-ROAM movement. During a scripted cutscene the avatar is under scripted
-            // control and the cutscene's own Start Encounter command drives the battle; if this physical
-            // trigger also fired here it would start the fade while the approach dialogue (GroveApproach) is
-            // still playing — the "dialogue flash". So when control is locked, stay out of the way.
+            // Only react to free-roam movement; during a cutscene the flowchart's own Start Encounter drives
+            // the battle, so firing here too would fade over the still-playing approach dialogue.
             var mover = other.GetComponent<PlayerMovement>();
             if (mover != null && !mover.ControlEnabled)
             {

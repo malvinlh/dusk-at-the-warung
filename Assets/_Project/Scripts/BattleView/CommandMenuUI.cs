@@ -28,6 +28,12 @@ namespace DuskWarung.Battle.View
         [SerializeField] private TMP_Text itemLabel;
         [SerializeField] private TMP_Text tooltipLabel;
 
+        [Header("Command icons (optional)")]
+        [SerializeField, Tooltip("Shows the current skill's icon; hidden when the skill has none.")]
+        private Image skillIcon;
+        [SerializeField, Tooltip("Shows the current item's icon; hidden when the item has none.")]
+        private Image itemIcon;
+
         [Header("Tooltips")]
         [SerializeField, TextArea] private string attackTooltip = "A firm, respectful whack.";
         [SerializeField, TextArea] private string runTooltip = "Bold strategy. Rarely works.";
@@ -160,6 +166,20 @@ namespace DuskWarung.Battle.View
             {
                 itemLabel.text = _itemSlot != null ? $"{_itemSlot.Item.displayName} x{_itemSlot.Count}" : "—";
             }
+
+            SetIcon(skillIcon, _skill != null ? _skill.icon : null);
+            SetIcon(itemIcon, _itemSlot != null ? _itemSlot.Item.icon : null);
+        }
+
+        private static void SetIcon(Image image, Sprite sprite)
+        {
+            if (image == null)
+            {
+                return;
+            }
+
+            image.sprite = sprite;
+            image.enabled = sprite != null;
         }
 
         private void Hover(string tooltip)

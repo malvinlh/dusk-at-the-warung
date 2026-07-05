@@ -3,11 +3,8 @@ using UnityEngine;
 namespace DuskWarung.Core
 {
     /// <summary>
-    /// Thin per-scene entry point for scene changes. It delegates the actual fade + load to the persistent
-    /// <see cref="SceneTransition"/> overlay, which covers both scenes' seams and so avoids the one-frame
-    /// flashes a per-scene fader leaves. The optional local overlay (kept from earlier scene setups) is
-    /// simply held transparent — the persistent overlay does the fading now. Existing Inspector wiring
-    /// (EncounterTrigger/BattleController/Title/End all reference a SceneLoader) keeps working unchanged.
+    /// Thin per-scene entry point for scene changes; delegates the fade + load to the persistent
+    /// <see cref="SceneTransition"/>. The optional local overlay is kept transparent for backward compatibility.
     /// </summary>
     public class SceneLoader : MonoBehaviour
     {

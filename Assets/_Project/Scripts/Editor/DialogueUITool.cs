@@ -45,27 +45,65 @@ namespace DuskWarung.EditorTools
             }
 
             SwapFontsAndRecolor(instance);
-
-            // SayDialog-specific: name-plate accent + a prominent portrait (Fungus reflows text around it).
-            var say = instance.GetComponentInChildren<SayDialog>(true);
-            if (say != null)
-            {
-                var so = new SerializedObject(say);
-                if (so.FindProperty("nameText").objectReferenceValue is Text nameText)
-                {
-                    nameText.color = new Color(1f, 0.86f, 0.5f);
-                    nameText.fontStyle = FontStyle.Bold;
-                }
-
-                if (so.FindProperty("characterImage").objectReferenceValue is Image portrait)
-                {
-                    portrait.preserveAspect = true;
-                    portrait.rectTransform.sizeDelta = new Vector2(180f, 180f);
-                }
-            }
-
+            LayoutSayDialog(instance);
             Save(instance, SayDest);
             return true;
+        }
+
+        /// <summary>
+        /// Lays out the SayDialog: a fixed text box with a right gutter for the portrait, a compact continue
+        /// arrow, and a tidy top-left name plate. Turns off Fungus's <c>fitTextWithImage</c> (its auto-reflow
+        /// assumes a left portrait) so this manual rect is authoritative and the text never runs under the face.
+        /// </summary>
+        private static void LayoutSayDialog(GameObject instance)
+        {
+            var say = instance.GetComponentInChildren<SayDialog>(true);
+            if (say == null)
+            {
+                return;
+            }
+
+            var so = new SerializedObject(say);
+            so.FindProperty("fitTextWithImage").boolValue = false;
+            so.ApplyModifiedPropertiesWithoutUndo();
+
+            if (so.FindProperty("storyText").objectReferenceValue is Text storyText)
+            {
+                RectTransform rt = storyText.rectTransform;
+                rt.anchorMin = Vector2.zero;
+                rt.anchorMax = Vector2.one;
+                rt.offsetMin = new Vector2(45f, 40f);
+                rt.offsetMax = new Vector2(-360f, -90f); // right gutter for the portrait, top gap for the name plate
+            }
+
+            if (so.FindProperty("characterImage").objectReferenceValue is Image portrait)
+            {
+                portrait.preserveAspect = true;
+                RectTransform rt = portrait.rectTransform;
+                rt.anchorMin = rt.anchorMax = new Vector2(1f, 0.5f);
+                rt.pivot = new Vector2(0.5f, 0.5f);
+                rt.sizeDelta = new Vector2(190f, 190f);
+                rt.anchoredPosition = new Vector2(-185f, 20f);
+            }
+
+            if (so.FindProperty("continueButton").objectReferenceValue is Button continueButton)
+            {
+                var rt = (RectTransform)continueButton.transform;
+                rt.sizeDelta = new Vector2(48f, 48f);
+                rt.anchoredPosition = new Vector2(-30f, 30f);
+            }
+
+            if (so.FindProperty("nameText").objectReferenceValue is Text nameText)
+            {
+                nameText.color = new Color(1f, 0.86f, 0.5f);
+                nameText.fontStyle = FontStyle.Bold;
+                nameText.alignment = TextAnchor.MiddleLeft;
+                RectTransform rt = nameText.rectTransform;
+                rt.anchorMin = rt.anchorMax = new Vector2(0f, 1f);
+                rt.pivot = new Vector2(0f, 1f);
+                rt.anchoredPosition = new Vector2(48f, -28f);
+                rt.sizeDelta = new Vector2(760f, 58f);
+            }
         }
 
         private static bool BuildMenuDialog()

@@ -33,11 +33,8 @@ namespace DuskWarung.World
         /// <summary>The last direction the player faced (defaults to down/south).</summary>
         public Vector2 Facing { get; private set; } = Vector2.down;
 
-        /// <summary>
-        /// Whether the human currently has control. False while a cutscene or battle has locked the avatar.
-        /// Systems that should only react to *free-roam* movement (e.g. <see cref="EncounterTrigger"/>) read
-        /// this so they don't fire during a scripted cutscene, whose own flow drives the outcome.
-        /// </summary>
+        /// <summary>False while a cutscene or battle has locked the avatar. Read by systems that should only
+        /// react to free-roam movement (e.g. <see cref="EncounterTrigger"/>).</summary>
         public bool ControlEnabled { get; private set; } = true;
 
         /// <summary>Enables or disables player control (used for cutscene/battle locks).</summary>

@@ -87,15 +87,11 @@ namespace DuskWarung.Battle.View
             StartCoroutine(IntroThenBattle());
         }
 
-        /// <summary>
-        /// Waits until the scene-transition overlay has finished revealing the battle scene, THEN plays the
-        /// intro dialog. Deferring the dialog until the scene is fully visible removes the execution-order
-        /// race between this <c>Start()</c> and Fungus's lazily-built SayDialog — the intro can no longer
-        /// pop into view a frame or two after the fade-in (the "dialogue flash").
-        /// </summary>
+        /// <summary>Waits for the scene transition to finish revealing the battle, then plays the intro dialog —
+        /// so the dialog can't race the fade-in and pop into view.</summary>
         private IEnumerator IntroThenBattle()
         {
-            // Instance auto-creates (non-busy) if the Battle scene is played directly, so this is safe.
+            // Instance auto-creates (non-busy) when the Battle scene is played directly, so this is safe.
             while (SceneTransition.Instance.IsBusy)
             {
                 yield return null;
@@ -138,11 +134,7 @@ namespace DuskWarung.Battle.View
             _machine.Start();
         }
 
-        /// <summary>
-        /// Shows or hides the HP/MP HUD. Hidden during narrative (intro / victory / defeat) so the dialogue
-        /// and portraits carry the focus — the Persona-style "clear the screen for the conversation" idea —
-        /// then faded back for combat. View-only; the model is untouched.
-        /// </summary>
+        /// <summary>Shows/hides the HP/MP HUD — hidden during narrative so dialogue holds focus, faded back for combat.</summary>
         private void SetHudVisible(bool visible, bool instant = false)
         {
             if (hudGroup == null)

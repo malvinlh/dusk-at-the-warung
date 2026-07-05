@@ -7,12 +7,9 @@ using UnityEngine.UI;
 namespace DuskWarung.Core
 {
     /// <summary>
-    /// The one deliberately-persistent object in the game: a full-screen black fade overlay that survives
-    /// scene loads (<see cref="Object.DontDestroyOnLoad"/>) at the maximum sorting order. Because a single
-    /// overlay covers the WHOLE transition — old scene fade-out, the load itself, and the new scene's first
-    /// frames — it eliminates the one-frame flashes that per-scene fade canvases leave behind (a dialog box
-    /// briefly showing, an un-faded first frame, etc.). Cross-scene visual continuity is the textbook reason
-    /// a singleton is justified here; it is auto-created, so no scene ever has to wire it.
+    /// Persistent full-screen fade overlay (<see cref="Object.DontDestroyOnLoad"/>) at max sorting order.
+    /// One overlay covers the whole transition — fade-out, load, and the new scene's first frames — so
+    /// per-scene fade flashes can't occur. Auto-created; no scene wires it.
     /// </summary>
     public class SceneTransition : MonoBehaviour
     {
@@ -35,11 +32,7 @@ namespace DuskWarung.Core
         private CanvasGroup _group;
         private bool _busy;
 
-        /// <summary>
-        /// True while a fade-out → load → fade-in is in progress. Incoming scenes wait on this before
-        /// showing their first dialog, so UI only ever appears on a fully-revealed, stable scene (rather
-        /// than racing the fade-in and popping into view). See <see cref="Battle.View.BattleController"/>.
-        /// </summary>
+        /// <summary>True while a transition is running; incoming scenes wait on it before showing dialog.</summary>
         public bool IsBusy => _busy;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
@@ -108,8 +101,7 @@ namespace DuskWarung.Core
                 yield return null;
             }
 
-            // Hold the cover for a couple of frames so the new scene's first Awake/Start (and any dialog it
-            // opens) happens entirely behind black.
+            // Hold black a couple of frames so the new scene's Awake/Start runs behind the cover.
             yield return null;
             yield return null;
 

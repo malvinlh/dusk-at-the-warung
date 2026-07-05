@@ -5,11 +5,8 @@ using UnityEngine;
 namespace DuskWarung.FungusCommands
 {
     /// <summary>
-    /// Fungus command that raises a story flag on <see cref="GameSession"/>, so narrative authors can
-    /// record progression ("met the warung owner", "beat the genderuwo") from a flowchart without code.
-    /// Progression gates (e.g. an <see cref="World.EncounterTrigger"/> with a required flag) then read it.
-    /// This is the designer-facing half of the event-flag system; the programmer ships the verb, the
-    /// designer decides when the story sets the flag.
+    /// Fungus command that raises a story flag on <see cref="GameSession"/>, letting authors record
+    /// progression from a flowchart. Gates such as <see cref="World.EncounterTrigger"/> read it back.
     /// </summary>
     [CommandInfo("Dusk", "Set Flag",
         "Raises a story flag on the game session (used to gate later progression).")]
