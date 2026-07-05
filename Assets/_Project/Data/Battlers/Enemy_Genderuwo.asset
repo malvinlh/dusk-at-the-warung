@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f5d55c30019b54f4ebffb4a3f644b968, type: 3}
+  m_Name: Enemy_Genderuwo
+  m_EditorClassIdentifier: 
+  displayName: Genderuwo
+  battleSprite: {fileID: -497097167, guid: 38300d5828c16b544bd99ae06ace5e82, type: 3}
+  maxHp: 30
+  maxMp: 10
+  attack: 11
+  defense: 4
+  speed: 6
+  skills: []
+  aiTable:
+  - skill: {fileID: 0}
+    weight: 3

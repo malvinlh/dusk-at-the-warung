@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 81b8c27dff0a17642b9b1883f1e076bf, type: 3}
+  m_Name: Player_Traveller
+  m_EditorClassIdentifier: 
+  displayName: Traveller
+  battleSprite: {fileID: -633222367, guid: ecf0c25de18135f4d9ee7b2559a34dc9, type: 3}
+  maxHp: 30
+  maxMp: 10
+  attack: 8
+  defense: 5
+  speed: 8
+  skills:
+  - {fileID: 11400000, guid: aaccee06a6c6f5a4c9e18be0fbe6ff99, type: 2}
+  startingItems:
+  - item: {fileID: 11400000, guid: c28b9764bad7c9e44aa87cd5c87f68c5, type: 2}
+    count: 3
