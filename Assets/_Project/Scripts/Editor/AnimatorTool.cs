@@ -12,14 +12,18 @@ namespace DuskWarung.EditorTools
     /// <item><c>AC_Character</c> — top-down Idle/Walk 2D directional blend trees (MoveX/MoveY/Speed).</item>
     /// <item><c>AC_PlayerBattler</c> / <c>AC_EnemyBattler</c> — Idle loop + Attack (trigger <c>PlayAttack</c>).</item>
     /// </list>
-    /// ASSUMPTION: the character Walk sheet rows are ordered <b>Down, Up, Left, Right</b>. If the avatar
-    /// faces the wrong way when moving, tell me and I flip <see cref="RowOrder"/> (a one-line change).
+    /// ASSUMPTION: the character Walk sheet lays out facings across columns (<b>Down, Up, Left, Right</b>).
+    /// If a facing comes out wrong, reorder <see cref="ColumnOrder"/> (a one-line change; the spin is
+    /// already fixed by grouping per column).
     /// </summary>
     public static class AnimatorTool
     {
-        // Row index in the sliced Walk.png for each facing. Change this if directions come out wrong.
         private enum Dir { Down = 0, Up = 1, Left = 2, Right = 3 }
-        private static readonly Dir[] RowOrder = { Dir.Down, Dir.Up, Dir.Left, Dir.Right };
+
+        // The Ninja Adventure Walk sheet lays out the four facings across COLUMNS (each row is a walk
+        // frame). This maps each facing to its column index. If a facing comes out wrong after playtest,
+        // reorder this array — the "spinning" is already fixed by grouping per column regardless of order.
+        private static readonly Dir[] ColumnOrder = { Dir.Down, Dir.Up, Dir.Left, Dir.Right };
 
         private const string PlayerWalk = DuskEditorUtil.SpritesDir + "/Player/SeparateAnim/Walk.png";
         private const string PlayerAttack = DuskEditorUtil.SpritesDir + "/Player/SeparateAnim/Attack.png";
@@ -58,17 +62,10 @@ namespace DuskWarung.EditorTools
                 return;
             }
 
-            int perRow = Mathf.Max(1, walk.Count / 4); // assume 4 direction rows
+            int cols = WalkColumnCount(); // facings are laid out across columns
 
-            Sprite[] Row(Dir dir)
-            {
-                int row = System.Array.IndexOf(RowOrder, dir);
-                int start = row * perRow;
-                return walk.Skip(start).Take(perRow).ToArray();
-            }
-
-            AnimationClip WalkClip(Dir d) => MakeClip($"Char_Walk_{d}", Row(d), 8f, true);
-            AnimationClip IdleClip(Dir d) => MakeClip($"Char_Idle_{d}", new[] { Row(d)[0] }, 1f, true);
+            AnimationClip WalkClip(Dir d) => MakeClip($"Char_Walk_{d}", Column(walk, cols, d), 8f, true);
+            AnimationClip IdleClip(Dir d) => MakeClip($"Char_Idle_{d}", new[] { Column(walk, cols, d)[0] }, 1f, true);
 
             string path = DuskEditorUtil.AnimatorsDir + "/AC_Character.controller";
             AnimatorController ac = RecreateController(path);
@@ -162,16 +159,38 @@ namespace DuskWarung.EditorTools
 
         private static Sprite[] PlayerBattlerIdle()
         {
-            // Use the front-facing (Down) walk frames as a gentle standing idle.
+            // Use the front-facing (Down) walk column as a gentle standing idle.
             List<Sprite> walk = DuskEditorUtil.LoadSpritesRowMajor(PlayerWalk);
             if (walk.Count == 0)
             {
                 return System.Array.Empty<Sprite>();
             }
 
-            int perRow = Mathf.Max(1, walk.Count / 4);
-            int downRow = System.Array.IndexOf(RowOrder, Dir.Down);
-            return walk.Skip(downRow * perRow).Take(perRow).ToArray();
+            return Column(walk, WalkColumnCount(), Dir.Down);
+        }
+
+        private static int WalkColumnCount()
+        {
+            var texture = AssetDatabase.LoadAssetAtPath<Texture2D>(PlayerWalk);
+            return texture != null ? Mathf.Max(1, texture.width / 16) : 4;
+        }
+
+        /// <summary>Returns every frame in the given facing's column (stride = column count).</summary>
+        private static Sprite[] Column(List<Sprite> frames, int cols, Dir dir)
+        {
+            int col = System.Array.IndexOf(ColumnOrder, dir);
+            if (col < 0)
+            {
+                col = 0;
+            }
+
+            var result = new List<Sprite>();
+            for (int row = 0; row * cols + col < frames.Count; row++)
+            {
+                result.Add(frames[row * cols + col]);
+            }
+
+            return result.Count > 0 ? result.ToArray() : new[] { frames[0] };
         }
 
         private static Sprite[] PlayerBattlerAttack()

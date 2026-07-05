@@ -38,6 +38,12 @@ namespace DuskWarung.FungusCommands
                 GameSession.HasReturnPosition = true;
             }
 
+            // Hide any lingering Say dialog so it can't flash during the fade-to-black.
+            if (SayDialog.ActiveSayDialog != null)
+            {
+                SayDialog.ActiveSayDialog.Stop();
+            }
+
             if (loader != null)
             {
                 loader.LoadWithFade(battleSceneName);

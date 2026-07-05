@@ -6,7 +6,7 @@ namespace DuskWarung.EditorTools
     /// <summary>Runs the whole build pipeline in order, and prints the remaining manual steps.</summary>
     public static class BuildAllMenu
     {
-        [MenuItem("Tools/Dusk Warung/Build Everything (0 → 6)", priority = 20)]
+        [MenuItem("Tools/Dusk Warung/Build Everything (0 → 9)", priority = 20)]
         public static void BuildEverything()
         {
             AssetConsolidationTool.Consolidate();
@@ -16,6 +16,9 @@ namespace DuskWarung.EditorTools
             AnimatorTool.Run();
             PrefabTool.Run();
             SceneBuildTool.Run();
+            FungusDialogueTool.Run();
+            MapPaintTool.Run();
+            FontAssetTool.Run();
             AssetDatabase.SaveAssets();
             Debug.Log("[Dusk] ✔ Build Everything complete. See 'Tools ▸ Dusk Warung ▸ Help' for the remaining manual steps.");
         }
@@ -24,15 +27,19 @@ namespace DuskWarung.EditorTools
         public static void Help()
         {
             Debug.Log(
-                "[Dusk] Remaining MANUAL steps after Build Everything:\n" +
-                "1. FUNGUS DIALOGUE — in each scene's Flowchart, author the Blocks (Overworld: TalkToSari, " +
-                "GroveApproach; Battle: BattleIntro, Victory; Overworld return: Defeat) using Say commands " +
-                "(lines in the design doc §10); assign the m5x7 TMP font on the SayDialog.\n" +
-                "2. MAP — paint the Overworld ground/props (Window ▸ 2D ▸ Tile Palette; tiles are under _Project/Art/Tiles).\n" +
-                "3. CHECK — verify the avatar faces the right way when walking (else tell me to flip the Walk row order); " +
-                "tune battler positions / enemy tint.\n" +
-                "4. PLAYTEST — Title ▸ Overworld ▸ (walk to grove) ▸ Battle ▸ Victory ▸ End. The loop works even before dialogue is written.\n" +
-                "5. (Optional) delete unused vendor packs (Tools ▸ Dusk Warung ▸ Cleanup), then Build Windows x64.");
+                "[Dusk] Build Everything is a ONE-TIME BOOTSTRAP. It generates a complete first pass; from here " +
+                "content is refined by hand in the Editor. See WORKFLOW.md for the full guide. Key points:\n" +
+                "• Safe to re-run anytime: 0 Consolidate, 3 Data, 4 Animators, 5 Prefabs, 9 Rebuild Fonts.\n" +
+                "• Bootstrap ONCE then hand-edit (do NOT re-run — they overwrite scenes): 6 Build Scenes, " +
+                "7 Seed Sample Dialogue. 8 Paint Greybox Map is a DEPRECATED throwaway pass — hand-paint instead.\n" +
+                "DESIGNER — edit dialogue in Tools ▸ Fungus ▸ Flowchart Window (plain text; no <b>/<i> tags); " +
+                "tune stats in _Project/Data/*.asset. Optional: assign the m5x7 TMP font on a SayDialog.\n" +
+                "FONTS — if text looks doubled/blurry, run 9 Rebuild Fonts (regenerates m5x7/monogram as SDFAA); " +
+                "fallback is Window ▸ TextMeshPro ▸ Font Asset Creator (padding 5, SDFAA) — see WORKFLOW.md.\n" +
+                "LEVEL DESIGNER — paint the map by hand in Window ▸ 2D ▸ Tile Palette (tiles in _Project/Art/Tiles) " +
+                "using .doc/map-blockout.png as the reference; add the warung/lamp/props; move actors, waypoints, grove trigger.\n" +
+                "PLAYTEST — Title ▸ Overworld ▸ talk to Bu Sari ▸ cutscene ▸ Battle ▸ Victory ▸ End. " +
+                "Then (optional) Cleanup ▸ delete vendor packs, and Build Windows x64.");
         }
     }
 }

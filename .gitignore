@@ -108,3 +108,6 @@ InitTestScene*.unity*
 # Miscellaneous
 /.doc
 /.vscode
+
+# Python venv used only for offline tooling (e.g. the map-blockout reference generator)
+/.venv/
