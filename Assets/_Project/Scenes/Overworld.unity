@@ -3521,7 +3521,7 @@ MonoBehaviour:
   scrollPos: {x: 139.60538, y: -294.77228}
   variablesScrollPos: {x: 0, y: 0}
   variablesExpanded: 1
-  blockViewHeight: 400
+  blockViewHeight: 310
   zoom: 0.73000026
   scrollViewRect:
     serializedVersion: 2
@@ -7869,6 +7869,7 @@ GameObject:
   - component: {fileID: 1368079689}
   - component: {fileID: 1368079688}
   - component: {fileID: 1368079687}
+  - component: {fileID: 1368079691}
   m_Layer: 0
   m_Name: OverworldFlow
   m_TagString: Untagged
@@ -8021,6 +8022,20 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1368079691
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1368079686}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 97412df556670ec4180e69a863da3bc9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sayDialog: {fileID: 669225788}
+  warmFrames: 3
 --- !u!1 &1373717331
 GameObject:
   m_ObjectHideFlags: 0

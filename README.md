@@ -12,9 +12,9 @@ The slice covers overworld exploration, an NPC conversation (Fungus), a self-dri
 
 ## Submission
 
-`.exe` build link:
+`.exe` build link: [https://drive.google.com/file/d/1vJdz-Maq5igQjX1F7dcIk8RDx8bFix6M/view?usp=sharing](https://drive.google.com/file/d/1vJdz-Maq5igQjX1F7dcIk8RDx8bFix6M/view?usp=sharing)
 
-Prototype video: 
+Prototype video: [https://drive.google.com/file/d/1CoQDSzqJLw7W47Pas224ZOOFIXW4rHZy/view?usp=sharing](https://drive.google.com/file/d/1CoQDSzqJLw7W47Pas224ZOOFIXW4rHZy/view?usp=sharing)
 
 ---
 
