@@ -54,6 +54,31 @@ Prototype video:
 - **Presentation screens and audio**: a styled title screen, victory/defeat/end screens, and per-scene
   music and sound effects.
 
+## Design considerations
+
+A few player-facing decisions, and the reasoning behind them:
+
+- **Playable with the keyboard alone.** Movement, interaction, dialogue advance, and every
+  battle command work from the keyboard, so the game needs no mouse (useful on a laptop or
+  trackpad). The mouse is supported as an equal alternative rather than a requirement. The
+  battle menu also keeps a command highlighted at all times and jumps the cursor to the
+  nearest usable option when one is disabled (for example, a skill with no MP left), so a
+  keyboard player is never left without a selection.
+
+- **Guidance instead of walls.** Walking into the grove before speaking to Bu Sari does not
+  fail silently; it plays a short hint that points the player back to her. Progression is
+  nudged rather than blocked, so a first-time player does not get stuck wondering what to do.
+
+- **Focus during story beats.** The combat HUD fades out while the intro and victory dialogue
+  play, then fades back for the fight, so the screen belongs to one thing at a time.
+
+- **Readable turn-based feedback.** Every action reports itself: a hit flash, a brief pause,
+  floating damage numbers, and an HP bar that drains a white chip. In a turn-based game the
+  player should always be able to read what just happened before the next turn.
+
+- **Low-friction retry.** A defeat is not a hard game over; the traveller wakes back at the
+  warung and can attempt the grove again, which suits a short vertical slice meant to be replayed.
+
 ## Battle mechanics
 
 Some of these are driven by chance and may not surface during a short playthrough:
@@ -175,6 +200,7 @@ on the existing systems:
 - **A single skill and item, with fixed balance.** More skills, items, and status effects would extend
   the model without changing its shape.
 - **One-versus-one combat.** A party and a target-selection step are the obvious next additions.
+- **Target resolution.** This prototype is optimized for a 1920 × 1080 (1080p) display.
 
 ## What I learned from developing this prototype
 

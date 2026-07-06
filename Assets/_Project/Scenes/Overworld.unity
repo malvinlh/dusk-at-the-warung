@@ -1281,7 +1281,7 @@ Tilemap:
     second:
       serializedVersion: 2
       m_TileIndex: 0
-      m_TileSpriteIndex: 7
+      m_TileSpriteIndex: 8
       m_TileMatrixIndex: 0
       m_TileColorIndex: 0
       m_TileObjectToInstantiateIndex: 65535
@@ -2871,7 +2871,7 @@ Tilemap:
     second:
       serializedVersion: 2
       m_TileIndex: 26
-      m_TileSpriteIndex: 5
+      m_TileSpriteIndex: 7
       m_TileMatrixIndex: 0
       m_TileColorIndex: 0
       m_TileObjectToInstantiateIndex: 65535
@@ -3214,14 +3214,14 @@ Tilemap:
     m_Data: {fileID: 0}
   - m_RefCount: 0
     m_Data: {fileID: 0}
-  - m_RefCount: 1
-    m_Data: {fileID: -749759261, guid: 0aedb2882e081904ab33844590b2e369, type: 3}
+  - m_RefCount: 0
+    m_Data: {fileID: 0}
   - m_RefCount: 1
     m_Data: {fileID: 2004076370, guid: 0aedb2882e081904ab33844590b2e369, type: 3}
   - m_RefCount: 1
+    m_Data: {fileID: -749759261, guid: 0aedb2882e081904ab33844590b2e369, type: 3}
+  - m_RefCount: 1
     m_Data: {fileID: 1014978688, guid: 0aedb2882e081904ab33844590b2e369, type: 3}
-  - m_RefCount: 0
-    m_Data: {fileID: 0}
   - m_RefCount: 2
     m_Data: {fileID: 802956432, guid: 0aedb2882e081904ab33844590b2e369, type: 3}
   - m_RefCount: 2
@@ -3518,11 +3518,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   version: 1
-  scrollPos: {x: 65.120865, y: 38.05932}
+  scrollPos: {x: 139.60538, y: -294.77228}
   variablesScrollPos: {x: 0, y: 0}
   variablesExpanded: 1
   blockViewHeight: 400
-  zoom: 0.9100001
+  zoom: 0.73000026
   scrollViewRect:
     serializedVersion: 2
     x: 0
@@ -3530,9 +3530,9 @@ MonoBehaviour:
     width: 0
     height: 0
   selectedBlocks:
-  - {fileID: 243297798}
+  - {fileID: 243297777}
   selectedCommands:
-  - {fileID: 243297791}
+  - {fileID: 243297776}
   variables: []
   description: 
   stepPause: 0
@@ -3619,7 +3619,7 @@ MonoBehaviour:
     serializedVersion: 2
     x: 80
     y: 460
-    width: 88.68132
+    width: 87.26026
     height: 40
   tint: {r: 1, g: 1, b: 1, a: 1}
   useCustomTint: 0
@@ -3645,7 +3645,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemId: 22
   indentLevel: 0
-  storyText: That grove looks pitch black. Maybe I should ask Bu Sari about it first.
+  storyText: That grove looks pitch black. Maybe I should ask that old woman about
+    it first.
   description: 
   character: {fileID: 1091308816}
   portrait: {fileID: 21300000, guid: 9dab425913495f949a10056803b6cc8e, type: 3}
@@ -3674,7 +3675,7 @@ MonoBehaviour:
     serializedVersion: 2
     x: 80
     y: 620
-    width: 141.42856
+    width: 138.76709
     height: 40
   tint: {r: 1, g: 1, b: 1, a: 1}
   useCustomTint: 0
@@ -3756,7 +3757,7 @@ MonoBehaviour:
     serializedVersion: 2
     x: 80
     y: 300
-    width: 138.7912
+    width: 134.38353
     height: 40
   tint: {r: 1, g: 1, b: 1, a: 1}
   useCustomTint: 0
@@ -4107,7 +4108,7 @@ MonoBehaviour:
     serializedVersion: 2
     x: 400
     y: 320
-    width: 117.69231
+    width: 115.7534
     height: 40
   tint: {r: 1, g: 1, b: 1, a: 1}
   useCustomTint: 0
@@ -4137,7 +4138,7 @@ MonoBehaviour:
     serializedVersion: 2
     x: 400
     y: 180.87912
-    width: 95.71428
+    width: 94.93149
     height: 40
   tint: {r: 1, g: 1, b: 1, a: 1}
   useCustomTint: 0
@@ -4165,7 +4166,7 @@ MonoBehaviour:
     serializedVersion: 2
     x: 400
     y: 40
-    width: 117.69231
+    width: 115.7534
     height: 40
   tint: {r: 1, g: 1, b: 1, a: 1}
   useCustomTint: 0
@@ -4193,7 +4194,7 @@ MonoBehaviour:
     serializedVersion: 2
     x: 80
     y: 80
-    width: 111.53846
+    width: 110.27396
     height: 40
   tint: {r: 1, g: 1, b: 1, a: 1}
   useCustomTint: 0
