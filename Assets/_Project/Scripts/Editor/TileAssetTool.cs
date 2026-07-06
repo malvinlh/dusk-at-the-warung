@@ -7,7 +7,7 @@ namespace DuskWarung.EditorTools
     /// <summary>
     /// Turns the sliced tileset sheets into individual <see cref="Tile"/> assets (skipping fully
     /// transparent cells) so there is a ready palette to paint the overworld with. Run
-    /// "Fix Imports &amp; Slice Tiles" first.
+    /// "1. Slice Tilesets" first.
     /// </summary>
     public static class TileAssetTool
     {
@@ -55,7 +55,7 @@ namespace DuskWarung.EditorTools
             var sprites = DuskEditorUtil.LoadSpritesRowMajor(pngPath);
             if (sprites.Count == 0)
             {
-                Debug.LogWarning($"[Dusk] {sheet} isn't sliced yet — run 'Fix Imports & Slice Tiles' first.");
+                Debug.LogWarning($"[Dusk] {sheet} isn't sliced yet — run '1. Slice Tilesets' first.");
                 return 0;
             }
 

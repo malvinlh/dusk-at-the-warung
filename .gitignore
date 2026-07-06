@@ -109,5 +109,5 @@ InitTestScene*.unity*
 /.doc
 /.vscode
 
-# Python venv used only for offline tooling (e.g. the map-blockout reference generator)
+# Python venv used for offline tooling
 /.venv/
